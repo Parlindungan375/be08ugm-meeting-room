@@ -1,10 +1,18 @@
 import express from 'express'
 
+import dotenv from 'dotenv'
+dotenv.config()
+
+import bodyParser from 'body-parser'
+import { mongo } from 'mongoose'
+
 import {Transaction, TransactionType} from './mongoose'
+import { Room, RoomType } from './room'
 
 const app = express()
 
 const transactionModel = new Transaction()
+const roomModel = new Room()
 
 // Transaction
 
@@ -61,3 +69,56 @@ const transactionModel = new Transaction()
 
     res.send({success: true})
   })
+
+//Room
+app.post('/room', async function(req, res, next) {
+  try{
+    await roomModel.create(req.body)
+  }catch (error){
+    return next(error)
+  }
+
+  res.send({success :true})
+})
+
+app.get('/room', async function(req, res, next) {
+  let rooms : RoomType[]
+  try {
+    rooms = await roomModel.getAll()
+  } catch (error){
+    return next(error)
+  }
+
+  return res.send(rooms)
+})
+
+app.get('/room/:id', async function(req, res, next) {
+  let room: RoomType | null
+  try{
+    room = await roomModel.getByID(req.params.id)
+  } catch (error){
+    return next(error)
+  }
+
+  return res.send(room)
+})
+
+app.put('/room', async function(req, res, next) {
+  try{
+    await roomModel.update(req.params.id, req.body)
+  } catch (error){
+    return next(error)
+  }
+
+  res.send({success :true})
+})
+
+app.delete('/room', async function(req, res, next) {
+  try{
+    await roomModel.delete(req.params.id)
+  } catch (error){
+    return next(error)
+  }
+
+  res.send({success : true})
+})
